@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Level Up!</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: radial-gradient(circle, #e0f7fa, #80deea);
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    h1 {
+      font-size: 3rem;
+      animation: bounce 1s infinite;
+      margin-bottom: 1rem;
+    }
+    #levelInfo {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      color: #0078d4;
+    }
+    button {
+      padding: 0.7rem 1.5rem;
+      font-size: 1.1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background-color: #0078d4;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #005a9e;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎉 You Leveled Up! 🎮</h1>
+  <div id="levelInfo"></div>
+  <button id="closeBtn">Close</button>
+
+  <script>
+    // Get level from URL query param, e.g., levelup.html?level=5
+    const urlParams = new URLSearchParams(window.location.search);
+    const level = urlParams.get('level');
+    const levelInfo = document.getElementById('levelInfo');
+
+    if (level) {
+      levelInfo.textContent = `Congratulations! You reached Level ${level}`;
+    }
+
+    document.getElementById('closeBtn').addEventListener('click', () => {
+      window.close();
+    });
+  </script>
+</body>
+</html>
