@@ -15,8 +15,10 @@ function applyMood(mood) {
 }
 
 function showXPPopup(xp) {
+  if (typeof xp !== "number" || isNaN(xp)) return;
+
   const xpPopup = document.createElement("div");
-  xpPopup.textContent = `XP: ${xp || 0}`;
+  xpPopup.textContent = `XP: ${xp}`;
   xpPopup.style.cssText = `
     position: fixed;
     top: 20px; right: 20px;
@@ -49,20 +51,22 @@ function showXPPopup(xp) {
   }, 3000);
 }
 
-// On page load, get mood and xp, apply mood and show XP popup
-chrome.storage.local.get(["mood", "xp"], ({ mood, xp }) => {
-  applyMood(mood);
-  showXPPopup(xp);
-});
+// Run after DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  chrome.storage.local.get(["mood", "xp"], ({ mood, xp }) => {
+    if (mood) applyMood(mood);
+    showXPPopup(xp);
+  });
 
-// Listen for mood changes and update background live
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "local") {
-    if (changes.mood) {
-      applyMood(changes.mood.newValue);
+  // Listen for mood or XP changes
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local") {
+      if (changes.mood) {
+        applyMood(changes.mood.newValue);
+      }
+      if (changes.xp) {
+        showXPPopup(changes.xp.newValue);
+      }
     }
-    if (changes.xp) {
-      showXPPopup(changes.xp.newValue);
-    }
-  }
+  });
 });
