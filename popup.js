@@ -28,16 +28,14 @@ const levelUpSoundFile = "sounds/levelup.mp3";
 let bgAudio = null;
 let levelUpAudio = null;
 
-// XP needed for each level increases as level * 60 seconds * XP per second (dynamic per upgrades)
+// XP required for each level
 function xpNeededForLevel(lv) {
-  // Time to next level doubles per level (starting from 60 seconds)
-  // XP per second depends on upgrades (2^upgrades)
   const baseTimeSeconds = 60 * (2 ** (lv - 1));
   const xpPerSec = 2 ** upgrades;
   return baseTimeSeconds * xpPerSec;
 }
 
-// Start or update background music according to current level
+// Play background music based on level
 function playBackgroundMusic(level) {
   if (bgAudio) {
     bgAudio.pause();
@@ -47,12 +45,10 @@ function playBackgroundMusic(level) {
   bgAudio = new Audio(bgMusicFiles[idx]);
   bgAudio.loop = true;
   bgAudio.volume = 0.3;
-  bgAudio.play().catch(() => {
-    // Ignore autoplay errors if any
-  });
+  bgAudio.play().catch(() => {});
 }
 
-// Play level up sound once
+// Play level-up sound
 function playLevelUpSound() {
   if (levelUpAudio) {
     levelUpAudio.pause();
@@ -63,10 +59,11 @@ function playLevelUpSound() {
   levelUpAudio.play().catch(() => {});
 }
 
-// Update popup UI elements with current data
+// UI update logic
 function updateUI() {
   levelSpan.textContent = level;
   xpSpan.textContent = totalXp.toFixed(0);
+
   const xpNeeded = xpNeededForLevel(level);
   const fillPercent = Math.min((totalXp / xpNeeded) * 100, 100);
   xpFillDiv.style.width = `${fillPercent}%`;
@@ -77,28 +74,25 @@ function updateUI() {
     ? "Max upgrades reached"
     : `Upgrade cost: ${upgradeCost} XP`;
 
-  // Enable mood select only if level >=1 (and up to MAX_LEVEL)
   moodSelect.disabled = level < 1;
 
-  // Update mood suggestions based on unlocked links
   updateMoodSuggestions();
-
-  // Update popup background and text colors based on selected mood
   updateMoodColors();
 }
 
-// Update suggestions for currently selected mood based on level unlock
+// Render suggestions based on level
 function updateMoodSuggestions() {
   const mood = moodSelect.value;
-  if (!moodConfig[mood]) {
+  const config = moodConfig[mood];
+
+  if (!config) {
     suggestionsDiv.style.display = "none";
     suggestionList.innerHTML = "";
     return;
   }
 
-  // Number of unlocked links = min(level, 4)
   const unlockedCount = Math.min(level, 4);
-  const suggestions = moodConfig[mood].suggestions.slice(0, unlockedCount);
+  const suggestions = config.suggestions.slice(0, unlockedCount);
 
   suggestionList.innerHTML = "";
   suggestions.forEach(({ label, link }) => {
@@ -114,27 +108,28 @@ function updateMoodSuggestions() {
   suggestionsDiv.style.display = suggestions.length > 0 ? "block" : "none";
 }
 
-// Update popup background and text colors based on moodConfig for selected mood
+// Change popup background & text color based on mood
 function updateMoodColors() {
   const mood = moodSelect.value;
-  if (moodConfig[mood]) {
-    document.body.style.backgroundColor = moodConfig[mood].bg;
-    document.body.style.color = moodConfig[mood].text;
+  const config = moodConfig[mood];
+
+  if (config && config.bg && config.text) {
+    document.body.style.background = config.bg;  // <-- changed here
+    document.body.style.color = config.text;
   } else {
-    // Default colors if none selected
-    document.body.style.backgroundColor = "linear-gradient(135deg, #e0f7fa, #80deea)";
+    document.body.style.background = "linear-gradient(135deg, #e0f7fa, #80deea)";
     document.body.style.color = "#023047";
   }
 }
 
-// Load state from storage
+// Load all saved state
 function loadState() {
   chrome.storage.local.get(["totalXp", "level", "upgrades", "selectedMood"], (data) => {
     totalXp = data.totalXp ?? 0;
     level = data.level ?? 1;
     upgrades = data.upgrades ?? 0;
 
-    if (data.selectedMood) {
+    if (data.selectedMood && moodConfig[data.selectedMood]) {
       moodSelect.value = data.selectedMood;
     }
 
@@ -143,12 +138,12 @@ function loadState() {
   });
 }
 
-// Save selected mood to storage
+// Save mood selection to storage
 function saveSelectedMood(mood) {
   chrome.storage.local.set({ selectedMood: mood });
 }
 
-// XP increment interval variables
+// Increment XP every second
 let xpIntervalId = null;
 function startXpInterval() {
   if (xpIntervalId) return;
@@ -165,13 +160,12 @@ function startXpInterval() {
       playBackgroundMusic(level);
     }
 
-    // Save state to storage and update UI
     chrome.storage.local.set({ totalXp, level });
     updateUI();
   }, 1000);
 }
 
-// Buy upgrade button click handler
+// Upgrade button logic
 buyUpgradeBtn.addEventListener("click", () => {
   const upgradeCost = 200 * (upgrades + 1);
   if (totalXp >= upgradeCost && upgrades < MAX_UPGRADE) {
@@ -182,13 +176,13 @@ buyUpgradeBtn.addEventListener("click", () => {
   }
 });
 
-// Mood select change handler
+// Mood selection change handler
 moodSelect.addEventListener("change", () => {
   saveSelectedMood(moodSelect.value);
   updateMoodSuggestions();
   updateMoodColors();
 });
 
-// Initialize
+// Init
 loadState();
 startXpInterval();
