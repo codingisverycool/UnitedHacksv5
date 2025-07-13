@@ -16,7 +16,7 @@ const moodConfig = {
       { label: 'Workout mix ', link: 'https://open.spotify.com/playlist/37i9dQZF1DX76Wlfdnj7AP' },
       { label: 'Funny Clash montage', link: 'https://www.youtube.com/watch?v=fP6G8ca0aU4' },
       { label: 'Speed typing game', link: 'https://10fastfingers.com/' },
-      { label: 'Speed-run challenge game', link: 'https://www.speedrun.com/games' }
+      { label: 'Speed-run challenge game', link: 'https://red-ball4.com/red-ball-4-volume-1#google_vignette' }
     ]
   },
   curious: {
