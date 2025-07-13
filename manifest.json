@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Mood Cast",
   "version": "1.5.2",
-  "description": "Productivity tracker gamified. Play as you type!",
+  "description": "Unlock mood-based content, games, and music as you level up through staying online.",
   "permissions": [
     "storage",
     "activeTab",
